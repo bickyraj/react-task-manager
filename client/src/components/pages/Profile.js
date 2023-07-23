@@ -1,8 +1,19 @@
-function Profile() {
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
+import Auth from "../Auth";
+
+const Profile = () => {
+  const { user } = useContext(AuthContext);
   return (
-    <div className="list-item">
-      This is the profile page
-    </div>
+    <>
+      {!user ? (
+        <Auth />
+      ) : (
+        <div className="list-item">
+          Email: {user.userEmail}
+        </div>
+      )}
+    </>
   );
 }
 

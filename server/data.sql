@@ -4,12 +4,17 @@ CREATE TABLE tasks (
   id VARCHAR(255) PRIMARY KEY,
   user_email VARCHAR(255),
   title VARCHAR(30),
+  description TEXT,
   urgency INT,
+  completion INT DEFAULT 0,
   date VARCHAR(300)
 );
 
 CREATE TABLE users (
   email VARCHAR(255) PRIMARY KEY,
+  name VARCHAR(255),
+  address VARCHAR(255),
+  dob DATE,
   hashed_password VARCHAR(255)
 );
 
