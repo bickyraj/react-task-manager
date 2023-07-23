@@ -27,7 +27,7 @@ app.post("/tasks" , async(req,res) => {
   try {
       const id = uuidv4();
       const newTask = await pool.query(
-        "INSERT INTO tasks (id, user_email, title, urgency, date, description) VALUES ($1, $2, $3, $4, $5) RETURNING *", 
+        "INSERT INTO tasks (id, user_email, title, urgency, date, description) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *", 
         [id, user_email, title, urgency, date, description]
       );
       res.json(newTask.rows[0]);
@@ -35,6 +35,7 @@ app.post("/tasks" , async(req,res) => {
     console.error(err.message)
   }
 });
+
 
 app.put("/tasks/:id", async (req, res) => {
   try {
@@ -45,6 +46,31 @@ app.put("/tasks/:id", async (req, res) => {
       [user_email, title, urgency, date, description, id]
     );
     res.json("Task was updated!");
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+app.get("/users/:userEmail", async (req, res) => {
+  const { userEmail } = req.params
+
+  try {
+    const tasks = await pool.query("SELECT * FROM users WHERE email = $1 LIMIT 1", [userEmail])
+    res.json(tasks.rows)
+  } catch (err) {
+    console.error(err.message)
+  }
+});
+
+app.put("/users/:userEmail", async (req, res) => {
+  try {
+    const { userEmail } = req.params;
+    const { email, name, address, dob } = req.body;
+    const updateTask = await pool.query(
+      "UPDATE users SET email = $1, name = $2, address = $3, dob = $4 WHERE email = $5",
+      [email, name, address, dob, userEmail]
+    );
+    res.json("User was updated!");
   } catch (err) {
     console.error(err.message);
   }

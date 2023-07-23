@@ -1,49 +1,57 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext.ts";
 
-import { postData, updateData } from "../services/tasksApi";
+import { getData, updateData } from "../services/profileApi.js";
 
-function Modal({ setIsModalOpen, mode, task, fetchTasks }) {
+function ProfileModal({ setIsModalOpen, mode, fetchTasks }) {
   const { user } = useContext(AuthContext);
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+    address: "",
+    dob: ""
+  });
+
+  async function fetchProfile() {
+    const res = await getData(user.userEmail);
+    const dateObject = new Date(res[0].dob);
+
+    // Step 2: Extract the year, month, and day components
+    const year = dateObject.getUTCFullYear();
+    const month = String(dateObject.getUTCMonth() + 1).padStart(2, '0'); // Month is 0-based, so we add 1 and pad with leading zeros if needed
+    const day = String(dateObject.getUTCDate()).padStart(2, '0');
+
+    // Step 3: Create a formatted string for the input type date
+    const userDob = `${year}-${month}-${day}`;
+    res[0].dob = userDob;
+    setProfile(res[0])
+  }
+  useEffect(() => {
+    fetchProfile();
+  }, []);
   const isEdit = mode === "edit";
   
   const [data, setData] = useState({
-    user_email: isEdit ? task.user_email : user.userEmail,
-    title: isEdit ? task.title : '',
-    description: isEdit ? task.description : '',
-    urgency: isEdit ? task.urgency : 1,
-    date: isEdit ? task.date : new Date(),
+    email: user.userEmail,
+    name: profile.name,
+    address: profile.address,
+    dob: profile.dob,
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setData((prevData) => ({
+    setProfile((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
 
-  const addTask = async (e) => {
+  const editUser = async (e) => {
     e.preventDefault();
-
     try {
-      await postData(data).then((res) => {
+      await updateData(data.email, profile).then((res) => {
         setIsModalOpen(false)
-        fetchTasks();
-      })
-    } catch (err) {
-      console.log(err)
-    }
-  };
-
-  const editTask = async (e) => {
-    e.preventDefault();
-
-    try {
-      await updateData(task.id, data).then((res) => {
-        setIsModalOpen(false)
-        fetchTasks();
       });
     } catch (err) {
       console.log(err)
@@ -64,38 +72,27 @@ function Modal({ setIsModalOpen, mode, task, fetchTasks }) {
 
             </div>
             <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
-              <h3 className="text-base font-semibold leading-6 text-gray-900" id="modal-title">{isEdit ? "Edit Task" : "Add New Task"}</h3>
+              <h3 className="text-base font-semibold leading-6 text-gray-900" id="modal-title">{isEdit ? "Edit User" : "Add New User"}</h3>
               <div className="mt-2 w-full">
-                  <div className="mb-2">
-                    <label for="title" class="block text-sm font-medium leading-6 text-gray-600">Title</label>
-                    <div class="mt-2">
-                      <input id="title" name="title" value={data.title} onChange={handleChange} type="text" autocomplete="email" placeholder="Please enter your task title" required class="block w-full px-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"/>
-                    </div>
-                  </div>
-
                 <div className="mb-2">
-                  <label for="title" class="block text-sm font-medium leading-6 text-gray-600">Description</label>
+                  <label for="name" class="block text-sm font-medium leading-6 text-gray-600">Name</label>
                   <div class="mt-2">
-                    <textarea id="title" rows={5} name="description" value={data.description} onChange={handleChange} type="text" autocomplete="no" placeholder="" required class="block w-full px-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"></textarea>
+                    <input id="name" name="name" value={profile.name} onChange={handleChange} type="text" autocomplete="email" placeholder="" required class="block w-full px-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6" />
                   </div>
                 </div>
 
-                  <div>
-                    <label for="urgency" class="block text-sm font-medium leading-6 text-gray-600">Urgency</label>
-                    <div class="mt-2">
-                      <input
-                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm placeholder:text-gray-400 sm:text-sm sm:leading-6"
-                        required
-                        name="urgency"
-                        id="urgency"
-                        type="range"
-                        min="1"
-                        max="3"
-                        value={data.urgency}
-                        onChange={handleChange}
-                      />
-                    </div>
+                <div className="mb-2">
+                  <label for="address" class="block text-sm font-medium leading-6 text-gray-600">Address</label>
+                  <div class="mt-2">
+                    <input id="address" name="address" value={profile.address} onChange={handleChange} type="text" autocomplete="email" placeholder="" required class="block w-full px-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6" />
                   </div>
+                </div>
+                <div className="mb-2">
+                  <label for="dob" class="block text-sm font-medium leading-6 text-gray-600">Dob</label>
+                  <div class="mt-2">
+                    <input id="dob" name="dob" value={profile.dob} onChange={handleChange} type="date" autocomplete="email" placeholder="" required class="block w-full px-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6" />
+                  </div>
+                </div>
                 {/* <p className="text-sm text-gray-500">Are you sure you want to deactivate your account? All of your data will be
                   permanently removed. This action cannot be undone.</p> */}
               </div>
@@ -104,8 +101,8 @@ function Modal({ setIsModalOpen, mode, task, fetchTasks }) {
         </div>
         <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
           <button type="submit"
-            onClick={isEdit ? editTask : addTask}
-            className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto">{isEdit ? "Save Task" : "Add Task"}</button>
+            onClick={editUser}
+            className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto">{isEdit ? "Save User" : "Add User"}</button>
           <button type="button"
             onClick={() => setIsModalOpen(false)}
             className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancel</button>
@@ -115,4 +112,4 @@ function Modal({ setIsModalOpen, mode, task, fetchTasks }) {
   );
 }
 
-export default Modal;
+export default ProfileModal;
