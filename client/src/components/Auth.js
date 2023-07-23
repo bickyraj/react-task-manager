@@ -11,6 +11,7 @@ function Auth() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const switchView = (status) => {
@@ -35,7 +36,7 @@ function Auth() {
         setError(res.err)
       } else {
         setError(null)
-        login({ userEmail: res.email, authToken: res.token });   
+        login({ userEmail: res.email, authToken: res.token, name: res.name });   
         console.log({ userEmail: res.email, authToken: res.token })     
       }
     })
@@ -46,14 +47,17 @@ function Auth() {
       <div className="auth-container">
         <h1>{isLogin ? "Login" : "Sign Up"}</h1>
         <form>
-          <label className="label">Email</label>
-          <input  required id="email" type="email" onChange={(e) => setEmail(e.target.value)} />
+          <label className="label">Email</label><br/>
+          <input className="block w-full px-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"  required id="email" type="email" onChange={(e) => setEmail(e.target.value)} />
+          <br />
           <label className="label">Password</label>
-          <input required id="password" type="password" onChange={(e) => setPassword(e.target.value)}/>
+          <br />
+          <input className="block w-full px-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6" required id="password" type="password" onChange={(e) => setPassword(e.target.value)}/>
+          <br />
           {!isLogin && 
             (<>
             <label className="label">Confirm Password</label>
-            <input required id="confirm-password" type="password" onChange={(e) => setConfirmPassword(e.target.value)}/>
+            <input className="block w-full px-2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6" required id="confirm-password" type="password" onChange={(e) => setConfirmPassword(e.target.value)}/>
             </>
           )}
           <button type="submit" className="submit" onClick={(e) => handleSubmit(e, isLogin ? "login" : "signup")}>{isLogin ? "Login" : "Sign Up"}</button>

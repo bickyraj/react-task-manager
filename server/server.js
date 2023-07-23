@@ -130,7 +130,7 @@ app.post("/login", async(req, res) => {
     }
 
     const token = jwt.sign({ email }, "secret", { expiresIn: "1h" });
-    res.json({ email, token })
+    res.json({ email, token, name: user.rows[0].name })
   } catch (err) {
     console.log(err.message)
   }
